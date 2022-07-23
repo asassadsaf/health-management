@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fkp.dao.MemberDao">
+    <select id="findByTelephone" parameterType="java.lang.String" resultType="com.fkp.pojo.Member">
+        select * from t_member where phoneNumber = #{telephone}
+    </select>
+
+    <insert id="add" parameterType="com.fkp.pojo.Member">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            select last_insert_id()
+        </selectKey>
+        insert into t_member(fileNumber, name, sex, idCard, phoneNumber, regTime, password, email, birthday, remark)
+        values (#{fileNumber},#{name},#{sex},#{idCard},#{phoneNumber},#{regTime},#{password}, #{email}, #{birthday}, #{remark})
+    </insert>
+
+    <select id="findById" parameterType="java.lang.Integer" resultType="com.fkp.pojo.Member">
+        select * from t_member where id = #{id}
+    </select>
+
+    <select id="findMemberCountBeforeDate" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(1) from t_member where regTime &lt;= #{date}
+    </select>
+
+    <select id="findMemberCountByDateLimit" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(1) from t_member where regTime between #{startDate} and #{endDate}
+    </select>
+
+    <select id="findMemberCountAll" resultType="java.lang.Integer">
+        select count(1) from t_member
+    </select>
+</mapper>

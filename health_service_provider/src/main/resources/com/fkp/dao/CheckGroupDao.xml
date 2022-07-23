@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fkp.dao.CheckGroupDao">
+    <resultMap id="baseResultMap" type="com.fkp.pojo.CheckGroup">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+    </resultMap>
+    
+    <resultMap id="findByIdResultMap" type="com.fkp.pojo.CheckGroup" extends="baseResultMap">
+        <collection property="checkItems" javaType="java.util.ArrayList" ofType="com.fkp.pojo.CheckItem" column="id" select="com.fkp.dao.CheckItemDao.findCheckItemById">
+
+        </collection>
+    </resultMap>
+    
+    
+    <!--新增检查组-->
+    <insert id="add" parameterType="com.fkp.pojo.CheckGroup">
+        <!--
+            通过mybatis框架提供的selectKey标签获得自增产生的Id值
+            其中resultType属性为sql语句返回的值的类型，order属性为在插入语句执行后执行，keyProperty属性将结果封装到CheckGroup对象中的id属性
+        -->
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into t_checkgroup(code, name, helpCode, sex, remark, attention)
+        values (#{code},#{name},#{helpCode},#{sex},#{remark},#{attention})
+    </insert>
+    
+    <!--添加检查组关联检查项关系-->
+<!--    <insert id="setCheckGroupIdAndCheckItem">-->
+<!--        insert into t_checkgroup_checkitem-->
+<!--        values (#{checkgroupId},#{checkitemId})-->
+<!--    </insert>-->
+    <insert id="setCheckGroupIdAndCheckItem" parameterType="java.util.Map">
+        insert into t_checkgroup_checkitem
+        values (#{checkgroupId},#{checkitemId})
+    </insert>
+
+    <!--检查组分页查询-->
+    <select id="selectByCondition" parameterType="string" resultType="com.fkp.pojo.CheckGroup">
+        select * from t_checkgroup
+        <if test="value !=null and value.length > 0">
+            where name = #{value} or code = #{value} or helpCode = #{value}
+        </if>
+    </select>
+
+    <!--根据检查组的id查询其关联的检查项的ids-->
+    <select id="findCheckItemIdsByCheckGroupId" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+        select checkitem_id from t_checkgroup_checkitem where checkgroup_id = #{value}
+    </select>
+
+    <!--根据检查组id查询检查组信息-->
+    <select id="findById" parameterType="java.lang.Integer" resultType="com.fkp.pojo.CheckGroup">
+        select * from t_checkgroup where id = #{id}
+    </select>
+
+    <!--修改检查组信息-->
+    <update id="edit" parameterType="com.fkp.pojo.CheckGroup">
+        update t_checkgroup
+        <set>
+            <if test="code != null">
+                code = #{code},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="helpCode != null">
+                helpCode = #{helpCode},
+            </if>
+            <if test="attention != null">
+                attention = #{attention},
+            </if>
+            <if test="sex != null">
+                sex = #{sex},
+            </if>
+            <if test="remark != null">
+                remark = #{remark}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--根据CheckGroupId删除检查组和检查项的关联关系-->
+    <delete id="deleteCheckItemCheckGroupRelByCheckGroupId" parameterType="java.lang.Integer">
+        delete from t_checkgroup_checkitem where checkgroup_id = #{id}
+    </delete>
+
+    <!--根据检查组id删除检查组信息-->
+    <delete id="deleteCheckGroupById" parameterType="java.lang.Integer">
+        delete from t_checkgroup where id = #{id}
+    </delete>
+
+    <!--查询所有检查组信息-->
+    <select id="findAll" resultType="com.fkp.pojo.CheckGroup">
+        select * from t_checkgroup
+    </select>
+
+    <select id="findCheckGroupById" parameterType="java.lang.Integer" resultMap="findByIdResultMap">
+        select * from t_checkgroup where id in (select checkgroup_id from t_setmeal_checkgroup where setmeal_id = #{setmeal_id})
+    </select>
+</mapper>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fkp.dao.RoleDao">
+    <select id="findByUserId" parameterType="java.lang.Integer" resultType="com.fkp.pojo.Role">
+        select r.* from t_role r,t_user_role ur where ur.role_id = r.id and ur.user_id = #{userId}
+    </select>
+</mapper>
